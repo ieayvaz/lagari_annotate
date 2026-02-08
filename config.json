@@ -1,0 +1,27 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": false
+  },
+  "paths": {
+    "images": "./images",
+    "annotations": "./annotations",
+    "exports": "./exports"
+  },
+  "annotation": {
+    "keypoints": [
+      {"name": "Head", "color": "#ef4444"},
+      {"name": "Tail", "color": "#3b82f6"},
+      {"name": "Right Wing", "color": "#10b981"},
+      {"name": "Left Wing", "color": "#f59e0b"}
+    ],
+    "point_radius": 8,
+    "required_points": 4
+  },
+  "ui": {
+    "theme": "default",
+    "show_progress": true,
+    "auto_advance": true
+  }
+}

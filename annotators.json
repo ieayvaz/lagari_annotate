@@ -1,0 +1,20 @@
+{
+  "annotator_1": {
+    "name": "eray",
+    "registered_at": "2026-02-08T15:52:38.341731",
+    "annotations_count": 1,
+    "last_annotation": "2026-02-08T15:53:29.344283"
+  },
+  "annotator_2": {
+    "name": "ismail",
+    "registered_at": "2026-02-08T16:05:33.048806",
+    "annotations_count": 2,
+    "last_annotation": "2026-02-08T16:16:00.971300"
+  },
+  "annotator_3": {
+    "name": "enes",
+    "registered_at": "2026-02-08T16:26:15.344155",
+    "annotations_count": 1,
+    "last_annotation": "2026-02-08T16:27:09.954418"
+  }
+}

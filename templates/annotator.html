@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAV Pose Annotation Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header .user-info {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 150px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 2px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            cursor: crosshair;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .image-list {
+            list-style: none;
+        }
+
+        .image-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            word-break: break-all;
+        }
+
+        .image-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .image-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #5568d3;
+        }
+
+        .image-item.annotated {
+            border-left: 4px solid #10b981;
+        }
+
+        .point-legend {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .point-legend h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .status {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .status h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2000;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .keyboard-shortcuts {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .keyboard-shortcuts h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .shortcut {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .key {
+            background: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛩️ UAV Pose Annotation Tool</h1>
+            <div class="user-info">
+                Annotator: <strong id="userName">Loading...</strong>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="status">
+                    <h3>📊 Progress</h3>
+                    <p><strong id="annotatedCount">0</strong> / <strong id="totalCount">0</strong> images annotated</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
+
+                <div class="point-legend">
+                    <h3>🎯 Keypoints</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>1. Head (Nose)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>2. Tail</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>3. Right Wing Tip</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span>4. Left Wing Tip</span>
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <h4>📝 Instructions</h4>
+                    <ol>
+                        <li>Click image to select & lock it</li>
+                        <li>🔒 = Someone else is working on it</li>
+                        <li>Click to place 4 points in order</li>
+                        <li>Right-click point to toggle visibility</li>
+                        <li>Press 'S' to save & unlock</li>
+                        <li>Use arrow keys to navigate</li>
+                    </ol>
+                </div>
+
+                <div class="keyboard-shortcuts">
+                    <h4>⌨️ Shortcuts</h4>
+                    <div class="shortcut">
+                        <span>Next Image</span>
+                        <span class="key">→</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Previous Image</span>
+                        <span class="key">←</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Save & Next</span>
+                        <span class="key">S</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Reset Points</span>
+                        <span class="key">R</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Toggle Visibility</span>
+                        <span class="key">V</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 10px; color: #333;">📁 Images</h3>
+                    <ul class="image-list" id="imageList"></ul>
+                </div>
+            </div>
+
+            <div class="canvas-area">
+                <div class="controls">
+                    <button class="btn-primary" onclick="prevImage()">← Previous</button>
+                    <button class="btn-primary" onclick="nextImage()">Next →</button>
+                    <button class="btn-success" onclick="saveAnnotation()">💾 Save</button>
+                    <button class="btn-warning" onclick="resetPoints()">↺ Reset Points</button>
+                    <button class="btn-danger" onclick="clearCanvas()">🗑️ Clear All</button>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div class="modal" id="registrationModal">
+        <div class="modal-content">
+            <h2>👋 Welcome to UAV Annotation!</h2>
+            <p style="margin-bottom: 20px; color: #666;">Please enter your name to get started</p>
+            <input type="text" id="nameInput" placeholder="Enter your name" autofocus>
+            <button class="btn-primary" onclick="registerUser()">Start Annotating</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Configuration
+        const POINT_LABELS = ['Head', 'Tail', 'Right Wing', 'Left Wing'];
+        const POINT_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'];
+        const POINT_RADIUS = 8;
+
+        // State
+        let canvas, ctx;
+        let images = [];
+        let currentImageIndex = 0;
+        let currentImage = null;
+        let points = []; // Each point: {x, y, visible}
+        let annotatorId = null;
+        let annotatorName = null;
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let selectedPointIndex = -1; // For visibility toggling
+        let imageLocks = {}; // Track who is working on which image
+        let currentImageLocked = false; // Is current image locked by us?
+
+        // Initialize
+        window.onload = function() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Check if user is already registered
+            const storedId = localStorage.getItem('annotatorId');
+            const storedName = localStorage.getItem('annotatorName');
+            
+            if (storedId && storedName) {
+                annotatorId = storedId;
+                annotatorName = storedName;
+                document.getElementById('userName').textContent = annotatorName;
+                loadImages();
+            } else {
+                showRegistrationModal();
+            }
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Canvas click handler
+            canvas.addEventListener('click', handleCanvasClick);
+            
+            // Canvas right-click handler for visibility toggle
+            canvas.addEventListener('contextmenu', handleCanvasRightClick);
+        };
+
+        function showRegistrationModal() {
+            document.getElementById('registrationModal').style.display = 'flex';
+            document.getElementById('nameInput').focus();
+            
+            document.getElementById('nameInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    registerUser();
+                }
+            });
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('nameInput').value.trim();
+            
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+
+                const data = await response.json();
+                annotatorId = data.annotator_id;
+                annotatorName = data.name;
+
+                localStorage.setItem('annotatorId', annotatorId);
+                localStorage.setItem('annotatorName', annotatorName);
+
+                document.getElementById('userName').textContent = annotatorName;
+                document.getElementById('registrationModal').style.display = 'none';
+
+                showNotification(`Welcome, ${annotatorName}! 🎉`);
+                loadImages();
+            } catch (error) {
+                alert('Error registering. Please try again.');
+                console.error(error);
+            }
+        }
+
+        async function loadImages() {
+            try {
+                const response = await fetch('/api/images');
+                const data = await response.json();
+                images = data.images;
+
+                if (images.length === 0) {
+                    alert('No images found! Please add images to the server images folder.');
+                    return;
+                }
+
+                renderImageList();
+                loadImage(0);
+                updateProgress();
+            } catch (error) {
+                alert('Error loading images. Make sure the server is running!');
+                console.error(error);
+            }
+        }
+
+        async function renderImageList() {
+            const list = document.getElementById('imageList');
+            list.innerHTML = '';
+
+            // Fetch current locks
+            try {
+                const response = await fetch('/api/locks');
+                imageLocks = await response.json();
+            } catch (error) {
+                console.error('Error fetching locks:', error);
+            }
+
+            images.forEach((img, index) => {
+                const li = document.createElement('li');
+                li.className = 'image-item';
+                
+                // Check if image is locked
+                if (imageLocks[img]) {
+                    const lockData = imageLocks[img];
+                    if (lockData.annotator_id === annotatorId) {
+                        // Locked by us
+                        li.textContent = `🔒 ${img} (You)`;
+                        li.style.fontWeight = 'bold';
+                    } else {
+                        // Locked by someone else
+                        li.textContent = `🔒 ${img} (${lockData.annotator_name})`;
+                        li.style.opacity = '0.6';
+                        li.style.cursor = 'not-allowed';
+                        li.onclick = () => {
+                            showNotification(`⚠️ ${lockData.annotator_name} is working on this image!`);
+                        };
+                        list.appendChild(li);
+                        return; // Skip normal onclick
+                    }
+                } else {
+                    li.textContent = img;
+                }
+                
+                li.onclick = () => loadImage(index);
+                
+                if (index === currentImageIndex) {
+                    li.classList.add('active');
+                }
+
+                list.appendChild(li);
+            });
+            
+            // Update annotation status (green borders) after rendering
+            await updateAnnotationStatus();
+        }
+
+        async function loadImage(index) {
+            if (index < 0 || index >= images.length) return;
+
+            // Unlock previous image if we had it locked
+            if (currentImageLocked && currentImageIndex >= 0) {
+                await unlockImage(images[currentImageIndex]);
+            }
+
+            currentImageIndex = index;
+            const imageName = images[index];
+
+            // Try to lock the image
+            try {
+                const lockResponse = await fetch(`/api/lock/${imageName}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        annotator_id: annotatorId,
+                        annotator_name: annotatorName
+                    })
+                });
+
+                const lockData = await lockResponse.json();
+
+                if (lockData.locked) {
+                    // Image is locked by someone else
+                    showNotification(`⚠️ ${lockData.locked_by} is currently working on this image!`);
+                    currentImageLocked = false;
+                    // Don't load the image, go back to previous or next available
+                    return;
+                } else {
+                    currentImageLocked = true;
+                }
+            } catch (error) {
+                console.error('Error locking image:', error);
+                currentImageLocked = false;
+            }
+
+            // Load existing annotation if any FIRST
+            try {
+                const response = await fetch(`/api/annotations/${imageName}`);
+                const data = await response.json();
+
+                if (data.exists !== false && data.points) {
+                    // Load existing points with visibility
+                    points = data.points.map(p => ({
+                        x: p.x,
+                        y: p.y,
+                        visible: p.visible !== undefined ? p.visible : true
+                    }));
+                } else {
+                    // Initialize empty points array
+                    points = [];
+                }
+            } catch (error) {
+                points = [];
+            }
+
+            // Load image AFTER loading annotation data
+            currentImage = new Image();
+            currentImage.onload = function() {
+                resizeCanvas();
+                drawImage(); // This will now draw the loaded points
+                renderImageList(); // This calls updateAnnotationStatus internally
+            };
+            currentImage.src = `/api/image/${imageName}`;
+        }
+
+        async function unlockImage(imageName) {
+            try {
+                await fetch(`/api/unlock/${imageName}`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Error unlocking image:', error);
+            }
+        }
+
+        function resizeCanvas() {
+            const wrapper = canvas.parentElement;
+            const maxWidth = wrapper.clientWidth - 40;
+            const maxHeight = wrapper.clientHeight - 40;
+
+            const imgAspect = currentImage.width / currentImage.height;
+            const containerAspect = maxWidth / maxHeight;
+
+            if (imgAspect > containerAspect) {
+                canvas.width = maxWidth;
+                canvas.height = maxWidth / imgAspect;
+            } else {
+                canvas.height = maxHeight;
+                canvas.width = maxHeight * imgAspect;
+            }
+
+            scale = canvas.width / currentImage.width;
+            offsetX = 0;
+            offsetY = 0;
+        }
+
+        function drawImage() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+
+            // Draw points
+            points.forEach((point, index) => {
+                const x = point.x * scale;
+                const y = point.y * scale;
+
+                if (point.visible) {
+                    // Draw visible point (solid)
+                    ctx.beginPath();
+                    ctx.arc(x, y, POINT_RADIUS, 0, 2 * Math.PI);
+                    ctx.fillStyle = POINT_COLORS[index];
+                    ctx.fill();
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Draw label
+                    ctx.fillStyle = 'white';
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 3;
+                    ctx.font = 'bold 14px Arial';
+                    ctx.strokeText(POINT_LABELS[index], x + 12, y - 8);
+                    ctx.fillText(POINT_LABELS[index], x + 12, y - 8);
+                } else {
+                    // Draw invisible point (dashed circle with X)
+                    ctx.beginPath();
+                    ctx.arc(x, y, POINT_RADIUS, 0, 2 * Math.PI);
+                    ctx.strokeStyle = POINT_COLORS[index];
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([3, 3]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Draw X
+                    ctx.strokeStyle = POINT_COLORS[index];
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x - 5, y - 5);
+                    ctx.lineTo(x + 5, y + 5);
+                    ctx.moveTo(x + 5, y - 5);
+                    ctx.lineTo(x - 5, y + 5);
+                    ctx.stroke();
+
+                    // Draw label with "HIDDEN"
+                    ctx.fillStyle = POINT_COLORS[index];
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 3;
+                    ctx.font = 'bold 12px Arial';
+                    ctx.strokeText(POINT_LABELS[index] + ' (HIDDEN)', x + 12, y - 8);
+                    ctx.fillText(POINT_LABELS[index] + ' (HIDDEN)', x + 12, y - 8);
+                }
+            });
+
+            // Draw lines connecting points if all are placed
+            if (points.length === 4) {
+                // Draw body line (head to tail) - only if both visible
+                if (points[0].visible && points[1].visible) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(points[0].x * scale, points[0].y * scale);
+                    ctx.lineTo(points[1].x * scale, points[1].y * scale);
+                    ctx.stroke();
+                }
+
+                // Draw wing line (right to left) - only if both visible
+                if (points[2].visible && points[3].visible) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(points[2].x * scale, points[2].y * scale);
+                    ctx.lineTo(points[3].x * scale, points[3].y * scale);
+                    ctx.stroke();
+                }
+                
+                ctx.setLineDash([]);
+            }
+        }
+
+        function handleCanvasClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = (event.clientX - rect.left) / scale;
+            const clickY = (event.clientY - rect.top) / scale;
+
+            // Check if clicking near existing point to select it
+            let clickedPointIndex = -1;
+            const clickThreshold = 15 / scale; // 15 pixels in image space
+            
+            for (let i = 0; i < points.length; i++) {
+                const dx = points[i].x - clickX;
+                const dy = points[i].y - clickY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < clickThreshold) {
+                    clickedPointIndex = i;
+                    break;
+                }
+            }
+
+            if (clickedPointIndex !== -1) {
+                // Clicked on existing point - toggle visibility with V key or right-click
+                selectedPointIndex = clickedPointIndex;
+                showNotification(`Point ${clickedPointIndex + 1} selected. Press V to toggle visibility or right-click.`);
+                return;
+            }
+
+            // Not clicking on existing point - add new point if space available
+            if (!currentImage || points.length >= 4) {
+                if (points.length >= 4) {
+                    showNotification('All points placed! Right-click a point or select & press V to toggle visibility.');
+                }
+                return;
+            }
+
+            // Add new point (default visible)
+            points.push({ x: clickX, y: clickY, visible: true });
+            drawImage();
+
+            if (points.length === 4) {
+                showNotification('All points placed! Press S to save. Right-click points to toggle visibility.');
+            }
+        }
+
+        function handleCanvasRightClick(event) {
+            event.preventDefault(); // Prevent context menu
+            
+            const rect = canvas.getBoundingClientRect();
+            const clickX = (event.clientX - rect.left) / scale;
+            const clickY = (event.clientY - rect.top) / scale;
+
+            // Find which point was clicked
+            const clickThreshold = 15 / scale;
+            
+            for (let i = 0; i < points.length; i++) {
+                const dx = points[i].x - clickX;
+                const dy = points[i].y - clickY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < clickThreshold) {
+                    // Toggle visibility
+                    points[i].visible = !points[i].visible;
+                    const status = points[i].visible ? 'VISIBLE' : 'HIDDEN';
+                    showNotification(`${POINT_LABELS[i]} marked as ${status}`);
+                    drawImage();
+                    return;
+                }
+            }
+        }
+
+        function resetPoints() {
+            points = [];
+            selectedPointIndex = -1;
+            drawImage();
+            showNotification('Points reset');
+        }
+
+        function clearCanvas() {
+            points = [];
+            selectedPointIndex = -1;
+            drawImage();
+        }
+
+        async function saveAnnotation() {
+            if (points.length !== 4) {
+                alert('Please place all 4 points before saving!');
+                return;
+            }
+
+            const imageName = images[currentImageIndex];
+
+            try {
+                const response = await fetch('/api/annotate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_name: imageName,
+                        annotator_id: annotatorId,
+                        annotator_name: annotatorName,
+                        points: points  // Includes x, y, visible for each point
+                    })
+                });
+
+                if (response.ok) {
+                    currentImageLocked = false; // Image is unlocked after save
+                    showNotification('✓ Annotation saved!');
+                    updateProgress();
+                    
+                    // Move to next image
+                    setTimeout(() => {
+                        nextImage();
+                    }, 500);
+                }
+            } catch (error) {
+                alert('Error saving annotation. Check server connection.');
+                console.error(error);
+            }
+        }
+
+        function nextImage() {
+            if (currentImageIndex < images.length - 1) {
+                loadImage(currentImageIndex + 1);
+            } else {
+                showNotification('🎉 You reached the last image!');
+            }
+        }
+
+        function prevImage() {
+            if (currentImageIndex > 0) {
+                loadImage(currentImageIndex - 1);
+            }
+        }
+
+        function toggleVisibility() {
+            if (selectedPointIndex >= 0 && selectedPointIndex < points.length) {
+                points[selectedPointIndex].visible = !points[selectedPointIndex].visible;
+                const status = points[selectedPointIndex].visible ? 'VISIBLE' : 'HIDDEN';
+                showNotification(`${POINT_LABELS[selectedPointIndex]} marked as ${status}`);
+                drawImage();
+            }
+        }
+
+        function handleKeyPress(event) {
+            switch(event.key.toLowerCase()) {
+                case 'arrowright':
+                    nextImage();
+                    break;
+                case 'arrowleft':
+                    prevImage();
+                    break;
+                case 's':
+                    if (points.length === 4) {
+                        saveAnnotation();
+                    }
+                    break;
+                case 'r':
+                    resetPoints();
+                    break;
+                case 'v':
+                    toggleVisibility();
+                    break;
+            }
+        }
+
+        async function updateProgress() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+
+                document.getElementById('totalCount').textContent = data.total_images;
+                document.getElementById('annotatedCount').textContent = data.total_annotations;
+
+                const percentage = data.total_images > 0 
+                    ? Math.round((data.total_annotations / data.total_images) * 100)
+                    : 0;
+
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressFill').textContent = percentage + '%';
+
+                // Update image list to show annotated images
+                await updateAnnotationStatus();
+            } catch (error) {
+                console.error('Error updating progress:', error);
+            }
+        }
+
+        async function updateAnnotationStatus() {
+            // Check which images are annotated
+            const listItems = document.querySelectorAll('.image-item');
+            
+            for (let i = 0; i < images.length; i++) {
+                try {
+                    const response = await fetch(`/api/annotations/${images[i]}`);
+                    const data = await response.json();
+                    
+                    // Check if annotation exists AND has points
+                    if (data.exists !== false && data.points && data.points.length > 0) {
+                        listItems[i].classList.add('annotated');
+                    } else {
+                        listItems[i].classList.remove('annotated');
+                    }
+                } catch (error) {
+                    // If there's an error, remove annotated class
+                    listItems[i].classList.remove('annotated');
+                }
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Update progress every 10 seconds
+        setInterval(updateProgress, 10000);
+        
+        // Refresh image list (to show locks) every 5 seconds
+        setInterval(renderImageList, 5000);
+        
+        // Refresh our lock every 2 minutes to prevent timeout
+        setInterval(async function() {
+            if (currentImageLocked && currentImageIndex >= 0) {
+                const imageName = images[currentImageIndex];
+                try {
+                    await fetch(`/api/lock/${imageName}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            annotator_id: annotatorId,
+                            annotator_name: annotatorName
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error refreshing lock:', error);
+                }
+            }
+        }, 120000); // Every 2 minutes
+        
+        // Unlock image when user closes/leaves the page
+        window.addEventListener('beforeunload', async function() {
+            if (currentImageLocked && currentImageIndex >= 0) {
+                const imageName = images[currentImageIndex];
+                // Use sendBeacon for reliability on page unload
+                const data = new Blob([JSON.stringify({})], { type: 'application/json' });
+                navigator.sendBeacon(`/api/unlock/${imageName}`, data);
+            }
+        });
+    </script>
+</body>
+</html>
