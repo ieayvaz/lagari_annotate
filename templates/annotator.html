@@ -375,7 +375,7 @@
                 </div>
 
                 <div class="point-legend">
-                    <h3>🎯 Anahtar Noktalar (6 nokta)</h3>
+                    <h3>🎯 Anahtar Noktalar (5 nokta)</h3>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #ef4444;"></div>
                         <span>1. Burun Ucu</span>
@@ -469,7 +469,6 @@
                     <button class="btn-success" onclick="saveAnnotation()">💾 Kaydet</button>
                     <button class="btn-warning" onclick="resetPoints()">↺ Noktaları Sıfırla</button>
                     <button class="btn-primary" onclick="resetZoom()">🔍 Yakınlaştırmayı Sıfırla</button>
-                    <button class="btn-danger" onclick="clearCanvas()">🗑️ Hepsini Temizle</button>
                 </div>
 
                 <div class="canvas-wrapper">
@@ -494,9 +493,9 @@
 
     <script>
         // Configuration
-        const POINT_LABELS = ['Burun Ucu', 'Sol Kanat Ucu', 'Sağ Kanat Ucu', 'Kuyruk', 'Kanat Kökü', 'Dikey Dengeleyici'];
-        const POINT_LABELS_EN = ['Nose Tip', 'Left Wing Tip', 'Right Wing Tip', 'Fuselage Tail', 'Wing Root', 'Vertical Stabilizer'];
-        const POINT_COLORS = ['#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#a855f7', '#ec4899']; // Red, Green, Yellow, Blue, Purple, Pink
+        const POINT_LABELS = ['Burun Ucu', 'Sol Kanat Ucu', 'Sağ Kanat Ucu', 'Kuyruk', 'Kanat Kökü'];
+        const POINT_LABELS_EN = ['Nose Tip', 'Left Wing Tip', 'Right Wing Tip', 'Fuselage Tail', 'Wing Root'];
+        const POINT_COLORS = ['#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#a855f7']; // Red, Green, Yellow, Blue, Purple
         const POINT_RADIUS = 5; // Small radius for small UAVs
 
         // State
@@ -867,7 +866,7 @@
             });
 
             // Draw lines connecting points if all are placed
-            if (points.length === 6) {
+            if (points.length === 5) {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
                 ctx.lineWidth = 2 / zoomLevel;
                 ctx.setLineDash([5 / zoomLevel, 5 / zoomLevel]);
@@ -943,9 +942,9 @@
             }
 
             // Not clicking on existing point - add new point if space available
-            if (!currentImage || points.length >= 6) {
-                if (points.length >= 6) {
-                    showNotification('Tüm 6 nokta yerleştirildi! Görünürlüğü değiştirmek için noktaya sağ tıklayın.');
+            if (!currentImage || points.length >= 5) {
+                if (points.length >= 5) {
+                    showNotification('Tüm 5 nokta yerleştirildi! Görünürlüğü değiştirmek için noktaya sağ tıklayın.');
                 }
                 return;
             }
@@ -955,10 +954,8 @@
             points.push({ x: clickX, y: clickY, visible: defaultVisible });
             drawImage();
 
-            if (points.length === 6) {
-                showNotification('Tüm 6 nokta yerleştirildi! Kaydetmek için S tuşuna basın. Görünürlüğü değiştirmek için sağ tıklayın.');
-            } else if (points.length === 5) {
-                showNotification('Son nokta: Dikey Dengeleyici (varsayılan: gizli). Varsa görünür yapın ve yerleştirin.');
+            if (points.length === 5) {
+                showNotification('Tüm 5 nokta yerleştirildi! Kaydetmek için S tuşuna basın. Görünürlüğü değiştirmek için sağ tıklayın.');
             }
         }
 
@@ -1084,7 +1081,7 @@
         }
 
         async function saveAnnotation() {
-            if (points.length !== 6) {
+            if (points.length !== 5) {
                 alert('Kaydetmeden önce lütfen tüm 6 noktayı yerleştirin!');
                 return;
             }
@@ -1165,7 +1162,7 @@
                     prevImage();
                     break;
                 case 's':
-                    if (points.length === 6) {
+                    if (points.length === 5) {
                         saveAnnotation();
                     }
                     break;

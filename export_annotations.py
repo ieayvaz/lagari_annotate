@@ -32,7 +32,6 @@ def export_to_csv(annotations, output_file='annotations.csv'):
             'right_wing_tip_x', 'right_wing_tip_y', 'right_wing_tip_visible',
             'fuselage_tail_x', 'fuselage_tail_y', 'fuselage_tail_visible',
             'wing_root_x', 'wing_root_y', 'wing_root_visible',
-            'vertical_stabilizer_x', 'vertical_stabilizer_y', 'vertical_stabilizer_visible'
         ])
         
         # Data
@@ -78,7 +77,7 @@ def export_to_coco(annotations, images_folder='./images', output_file='coco_anno
                 "id": 1,
                 "name": "uav",
                 "supercategory": "vehicle",
-                "keypoints": ["nose_tip", "left_wing_tip", "right_wing_tip", "fuselage_tail", "wing_root", "vertical_stabilizer"],
+                "keypoints": ["nose_tip", "left_wing_tip", "right_wing_tip", "fuselage_tail", "wing_root"],
                 "skeleton": [[0, 3], [1, 2]]  # nose to tail, left wing to right wing
             }
         ]
