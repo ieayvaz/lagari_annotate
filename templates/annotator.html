@@ -463,6 +463,9 @@
                 <div class="controls">
                     <button class="btn-primary" onclick="prevImage()">← Önceki</button>
                     <button class="btn-primary" onclick="nextImage()">Sonraki →</button>
+                    
+                    <button class="btn-warning" onclick="undoPoint()" style="background: #8b5cf6;">↩️ Geri Al</button>
+
                     <button class="btn-success" onclick="saveAnnotation()">💾 Kaydet</button>
                     <button class="btn-warning" onclick="resetPoints()">↺ Noktaları Sıfırla</button>
                     <button class="btn-primary" onclick="resetZoom()">🔍 Yakınlaştırmayı Sıfırla</button>
@@ -1063,6 +1066,23 @@
             drawImage();
         }
 
+        function undoPoint() {
+            if (points.length > 0) {
+                // Remove the last added point
+                points.pop();
+                
+                // Reset selection index to prevent errors
+                selectedPointIndex = -1;
+                
+                // Redraw the canvas to update lines and dots
+                drawImage();
+                
+                showNotification('Son nokta geri alındı');
+            } else {
+                showNotification('Geri alınacak nokta yok');
+            }
+        }
+
         async function saveAnnotation() {
             if (points.length !== 6) {
                 alert('Kaydetmeden önce lütfen tüm 6 noktayı yerleştirin!');
@@ -1123,6 +1143,20 @@
         }
 
         function handleKeyPress(event) {
+            // Handle Ctrl+Z for Undo
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+                event.preventDefault();
+                undoPoint();
+                return;
+            }
+
+            // Handle Backspace for Undo
+            if (event.key === 'Backspace') {
+                undoPoint();
+                return;
+            }
+
+            // Existing shortcuts
             switch(event.key.toLowerCase()) {
                 case 'arrowright':
                     nextImage();
@@ -1141,7 +1175,9 @@
                 case 'v':
                     toggleVisibility();
                     break;
-                case 'z':
+                case 'z': 
+                    // Note: Single 'z' is still Reset Zoom. 
+                    // Ctrl+z is now Undo.
                     resetZoom();
                     break;
             }
