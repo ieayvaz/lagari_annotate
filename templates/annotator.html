@@ -351,91 +351,122 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛩️ UAV Pose Annotation Tool</h1>
+            <h1>🛩️ İHA Poz Etiketleme Aracı</h1>
             <div class="user-info">
-                Annotator: <strong id="userName">Loading...</strong>
+                Etiketleyici: <strong id="userName">Yükleniyor...</strong>
             </div>
         </div>
 
         <div class="main-content">
             <div class="sidebar">
                 <div class="status">
-                    <h3>📊 Progress</h3>
-                    <p><strong id="annotatedCount">0</strong> / <strong id="totalCount">0</strong> images annotated</p>
+                    <h3>📊 İlerleme</h3>
+                    <p><strong id="annotatedCount">0</strong> / <strong id="totalCount">0</strong> görsel etiketlendi</p>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill">0%</div>
                     </div>
                 </div>
 
                 <div class="point-legend">
-                    <h3>🎯 Keypoints</h3>
+                    <h3>📁 Klasör</h3>
+                    <select id="subfolderSelector" onchange="loadImages(this.value)" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 15px;">
+                        <option value="">Tüm Görseller (Ana Klasör)</option>
+                    </select>
+                </div>
+
+                <div class="point-legend">
+                    <h3>🎯 Anahtar Noktalar (6 nokta)</h3>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #ef4444;"></div>
-                        <span>1. Head (Nose)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3b82f6;"></div>
-                        <span>2. Tail</span>
+                        <span>1. Burun Ucu</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #10b981;"></div>
-                        <span>3. Right Wing Tip</span>
+                        <span>2. Sol Kanat Ucu</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #f59e0b;"></div>
-                        <span>4. Left Wing Tip</span>
+                        <span>3. Sağ Kanat Ucu</span>
                     </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>4. Kuyruk (Gövde)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #a855f7;"></div>
+                        <span>5. Kanat Kökü</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ec4899;"></div>
+                        <span>6. Dikey Dengeleyici *</span>
+                    </div>
+                    <p style="font-size: 11px; color: #666; margin-top: 8px;">* Yoksa gizli olarak işaretle</p>
                 </div>
 
                 <div class="instructions">
-                    <h4>📝 Instructions</h4>
+                    <h4>📝 Talimatlar</h4>
                     <ol>
-                        <li>Click image to select & lock it</li>
-                        <li>🔒 = Someone else is working on it</li>
-                        <li>Click to place 4 points in order</li>
-                        <li>Right-click point to toggle visibility</li>
-                        <li>Press 'S' to save & unlock</li>
-                        <li>Use arrow keys to navigate</li>
+                        <li>Klasörü seçin (atandıysa)</li>
+                        <li>Görsele tıklayın (otomatik kilitlenir)</li>
+                        <li>🔒 = Başkası üzerinde çalışıyor</li>
+                        <li>6 noktayı sırayla yerleştirin</li>
+                        <li>Yakınlaştırma: Fare tekerleği</li>
+                        <li>Kaydırma: Shift+Sürükle</li>
+                        <li>Görünürlük: Sağ tıklama</li>
+                        <li>Kaydet: 'S' tuşu</li>
                     </ol>
                 </div>
 
                 <div class="keyboard-shortcuts">
-                    <h4>⌨️ Shortcuts</h4>
+                    <h4>⌨️ Kısayollar</h4>
                     <div class="shortcut">
-                        <span>Next Image</span>
+                        <span>Sonraki Görsel</span>
                         <span class="key">→</span>
                     </div>
                     <div class="shortcut">
-                        <span>Previous Image</span>
+                        <span>Önceki Görsel</span>
                         <span class="key">←</span>
                     </div>
                     <div class="shortcut">
-                        <span>Save & Next</span>
+                        <span>Kaydet ve Devam</span>
                         <span class="key">S</span>
                     </div>
                     <div class="shortcut">
-                        <span>Reset Points</span>
+                        <span>Noktaları Sıfırla</span>
                         <span class="key">R</span>
                     </div>
                     <div class="shortcut">
-                        <span>Toggle Visibility</span>
+                        <span>Görünürlük</span>
                         <span class="key">V</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Yakınlaştırmayı Sıfırla</span>
+                        <span class="key">Z</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Yakınlaştır</span>
+                        <span class="key">Tekerlek</span>
+                    </div>
+                    <div class="shortcut">
+                        <span>Kaydır</span>
+                        <span class="key">Shift+Sürükle</span>
                     </div>
                 </div>
 
                 <div style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 10px; color: #333;">📁 Images</h3>
+                    <h3 style="margin-bottom: 10px; color: #333;">📁 Görseller</h3>
                     <ul class="image-list" id="imageList"></ul>
                 </div>
             </div>
 
             <div class="canvas-area">
                 <div class="controls">
-                    <button class="btn-primary" onclick="prevImage()">← Previous</button>
-                    <button class="btn-primary" onclick="nextImage()">Next →</button>
-                    <button class="btn-success" onclick="saveAnnotation()">💾 Save</button>
-                    <button class="btn-warning" onclick="resetPoints()">↺ Reset Points</button>
-                    <button class="btn-danger" onclick="clearCanvas()">🗑️ Clear All</button>
+                    <button class="btn-primary" onclick="prevImage()">← Önceki</button>
+                    <button class="btn-primary" onclick="nextImage()">Sonraki →</button>
+                    <button class="btn-success" onclick="saveAnnotation()">💾 Kaydet</button>
+                    <button class="btn-warning" onclick="resetPoints()">↺ Noktaları Sıfırla</button>
+                    <button class="btn-primary" onclick="resetZoom()">🔍 Yakınlaştırmayı Sıfırla</button>
+                    <button class="btn-danger" onclick="clearCanvas()">🗑️ Hepsini Temizle</button>
                 </div>
 
                 <div class="canvas-wrapper">
@@ -448,10 +479,10 @@
     <!-- Registration Modal -->
     <div class="modal" id="registrationModal">
         <div class="modal-content">
-            <h2>👋 Welcome to UAV Annotation!</h2>
-            <p style="margin-bottom: 20px; color: #666;">Please enter your name to get started</p>
-            <input type="text" id="nameInput" placeholder="Enter your name" autofocus>
-            <button class="btn-primary" onclick="registerUser()">Start Annotating</button>
+            <h2>👋 İHA Etiketleme'ye Hoş Geldiniz!</h2>
+            <p style="margin-bottom: 20px; color: #666;">Başlamak için lütfen adınızı girin</p>
+            <input type="text" id="nameInput" placeholder="Adınızı girin" autofocus>
+            <button class="btn-primary" onclick="registerUser()">Etiketlemeye Başla</button>
         </div>
     </div>
 
@@ -460,9 +491,10 @@
 
     <script>
         // Configuration
-        const POINT_LABELS = ['Head', 'Tail', 'Right Wing', 'Left Wing'];
-        const POINT_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'];
-        const POINT_RADIUS = 8;
+        const POINT_LABELS = ['Burun Ucu', 'Sol Kanat Ucu', 'Sağ Kanat Ucu', 'Kuyruk', 'Kanat Kökü', 'Dikey Dengeleyici'];
+        const POINT_LABELS_EN = ['Nose Tip', 'Left Wing Tip', 'Right Wing Tip', 'Fuselage Tail', 'Wing Root', 'Vertical Stabilizer'];
+        const POINT_COLORS = ['#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#a855f7', '#ec4899']; // Red, Green, Yellow, Blue, Purple, Pink
+        const POINT_RADIUS = 5; // Small radius for small UAVs
 
         // State
         let canvas, ctx;
@@ -478,6 +510,13 @@
         let selectedPointIndex = -1; // For visibility toggling
         let imageLocks = {}; // Track who is working on which image
         let currentImageLocked = false; // Is current image locked by us?
+        let zoomLevel = 1.0; // Zoom factor (1.0 = no zoom)
+        let panX = 0; // Pan offset X
+        let panY = 0; // Pan offset Y
+        let isPanning = false; // Is user currently panning?
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let currentSubfolder = ''; // Current selected subfolder
 
         // Initialize
         window.onload = function() {
@@ -492,6 +531,7 @@
                 annotatorId = storedId;
                 annotatorName = storedName;
                 document.getElementById('userName').textContent = annotatorName;
+                loadSubfolders();
                 loadImages();
             } else {
                 showRegistrationModal();
@@ -505,6 +545,15 @@
             
             // Canvas right-click handler for visibility toggle
             canvas.addEventListener('contextmenu', handleCanvasRightClick);
+            
+            // Mouse wheel zoom
+            canvas.addEventListener('wheel', handleMouseWheel);
+            
+            // Middle mouse button pan
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('mouseleave', handleMouseUp);
         };
 
         function showRegistrationModal() {
@@ -522,7 +571,7 @@
             const name = document.getElementById('nameInput').value.trim();
             
             if (!name) {
-                alert('Please enter your name!');
+                alert('Lütfen adınızı girin!');
                 return;
             }
 
@@ -543,22 +592,26 @@
                 document.getElementById('userName').textContent = annotatorName;
                 document.getElementById('registrationModal').style.display = 'none';
 
-                showNotification(`Welcome, ${annotatorName}! 🎉`);
+                showNotification(`Hoş geldiniz, ${annotatorName}! 🎉`);
+                loadSubfolders();
                 loadImages();
             } catch (error) {
-                alert('Error registering. Please try again.');
+                alert('Kayıt hatası. Lütfen tekrar deneyin.');
                 console.error(error);
             }
         }
 
-        async function loadImages() {
+        async function loadImages(subfolder = '') {
+            currentSubfolder = subfolder;
+            
             try {
-                const response = await fetch('/api/images');
+                const url = subfolder ? `/api/images?subfolder=${encodeURIComponent(subfolder)}` : '/api/images';
+                const response = await fetch(url);
                 const data = await response.json();
                 images = data.images;
 
                 if (images.length === 0) {
-                    alert('No images found! Please add images to the server images folder.');
+                    alert(`${subfolder || 'ana klasörde'} görsel bulunamadı! Lütfen sunucu görseller klasörüne görsel ekleyin.`);
                     return;
                 }
 
@@ -566,8 +619,28 @@
                 loadImage(0);
                 updateProgress();
             } catch (error) {
-                alert('Error loading images. Make sure the server is running!');
+                alert('Görseller yüklenirken hata! Sunucunun çalıştığından emin olun!');
                 console.error(error);
+            }
+        }
+
+        async function loadSubfolders() {
+            try {
+                const response = await fetch('/api/subfolders');
+                const data = await response.json();
+                
+                const selector = document.getElementById('subfolderSelector');
+                if (selector && data.subfolders) {
+                    selector.innerHTML = '';
+                    data.subfolders.forEach(folder => {
+                        const option = document.createElement('option');
+                        option.value = folder;
+                        option.textContent = folder || 'All Images (Root)';
+                        selector.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading subfolders:', error);
             }
         }
 
@@ -592,7 +665,7 @@
                     const lockData = imageLocks[img];
                     if (lockData.annotator_id === annotatorId) {
                         // Locked by us
-                        li.textContent = `🔒 ${img} (You)`;
+                        li.textContent = `🔒 ${img} (Siz)`;
                         li.style.fontWeight = 'bold';
                     } else {
                         // Locked by someone else
@@ -600,7 +673,7 @@
                         li.style.opacity = '0.6';
                         li.style.cursor = 'not-allowed';
                         li.onclick = () => {
-                            showNotification(`⚠️ ${lockData.annotator_name} is working on this image!`);
+                            showNotification(`⚠️ ${lockData.annotator_name} bu görsel üzerinde çalışıyor!`);
                         };
                         list.appendChild(li);
                         return; // Skip normal onclick
@@ -648,7 +721,7 @@
 
                 if (lockData.locked) {
                     // Image is locked by someone else
-                    showNotification(`⚠️ ${lockData.locked_by} is currently working on this image!`);
+                    showNotification(`⚠️ ${lockData.locked_by} şu anda bu görsel üzerinde çalışıyor!`);
                     currentImageLocked = false;
                     // Don't load the image, go back to previous or next available
                     return;
@@ -723,96 +796,127 @@
 
         function drawImage() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+            
+            // Save context state
+            ctx.save();
+            
+            // Apply zoom and pan transformations
+            ctx.translate(panX, panY);
+            ctx.scale(zoomLevel, zoomLevel);
+            
+            // Draw the image
+            ctx.drawImage(currentImage, 0, 0, canvas.width / zoomLevel, canvas.height / zoomLevel);
 
             // Draw points
             points.forEach((point, index) => {
-                const x = point.x * scale;
-                const y = point.y * scale;
+                const x = (point.x * scale);
+                const y = (point.y * scale);
 
                 if (point.visible) {
                     // Draw visible point (solid)
                     ctx.beginPath();
-                    ctx.arc(x, y, POINT_RADIUS, 0, 2 * Math.PI);
+                    ctx.arc(x, y, POINT_RADIUS / zoomLevel, 0, 2 * Math.PI);
                     ctx.fillStyle = POINT_COLORS[index];
                     ctx.fill();
                     ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 2 / zoomLevel;
                     ctx.stroke();
 
                     // Draw label
                     ctx.fillStyle = 'white';
                     ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 3;
-                    ctx.font = 'bold 14px Arial';
-                    ctx.strokeText(POINT_LABELS[index], x + 12, y - 8);
-                    ctx.fillText(POINT_LABELS[index], x + 12, y - 8);
+                    ctx.lineWidth = 2 / zoomLevel;
+                    ctx.font = `bold ${11 / zoomLevel}px Arial`;
+                    ctx.strokeText(POINT_LABELS[index], x + 10 / zoomLevel, y - 6 / zoomLevel);
+                    ctx.fillText(POINT_LABELS[index], x + 10 / zoomLevel, y - 6 / zoomLevel);
                 } else {
                     // Draw invisible point (dashed circle with X)
                     ctx.beginPath();
-                    ctx.arc(x, y, POINT_RADIUS, 0, 2 * Math.PI);
+                    ctx.arc(x, y, POINT_RADIUS / zoomLevel, 0, 2 * Math.PI);
                     ctx.strokeStyle = POINT_COLORS[index];
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([3, 3]);
+                    ctx.lineWidth = 2 / zoomLevel;
+                    ctx.setLineDash([3 / zoomLevel, 3 / zoomLevel]);
                     ctx.stroke();
                     ctx.setLineDash([]);
                     
                     // Draw X
                     ctx.strokeStyle = POINT_COLORS[index];
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 2 / zoomLevel;
                     ctx.beginPath();
-                    ctx.moveTo(x - 5, y - 5);
-                    ctx.lineTo(x + 5, y + 5);
-                    ctx.moveTo(x + 5, y - 5);
-                    ctx.lineTo(x - 5, y + 5);
+                    const crossSize = 4 / zoomLevel;
+                    ctx.moveTo(x - crossSize, y - crossSize);
+                    ctx.lineTo(x + crossSize, y + crossSize);
+                    ctx.moveTo(x + crossSize, y - crossSize);
+                    ctx.lineTo(x - crossSize, y + crossSize);
                     ctx.stroke();
 
                     // Draw label with "HIDDEN"
                     ctx.fillStyle = POINT_COLORS[index];
                     ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 3;
-                    ctx.font = 'bold 12px Arial';
-                    ctx.strokeText(POINT_LABELS[index] + ' (HIDDEN)', x + 12, y - 8);
-                    ctx.fillText(POINT_LABELS[index] + ' (HIDDEN)', x + 12, y - 8);
+                    ctx.lineWidth = 2 / zoomLevel;
+                    ctx.font = `bold ${10 / zoomLevel}px Arial`;
+                    ctx.strokeText(POINT_LABELS[index] + ' (GİZLİ)', x + 10 / zoomLevel, y - 6 / zoomLevel);
+                    ctx.fillText(POINT_LABELS[index] + ' (GİZLİ)', x + 10 / zoomLevel, y - 6 / zoomLevel);
                 }
             });
 
             // Draw lines connecting points if all are placed
-            if (points.length === 4) {
-                // Draw body line (head to tail) - only if both visible
-                if (points[0].visible && points[1].visible) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
+            if (points.length === 6) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 2 / zoomLevel;
+                ctx.setLineDash([5 / zoomLevel, 5 / zoomLevel]);
+
+                // Draw body line (nose to tail) - only if both visible
+                if (points[0].visible && points[3].visible) {
                     ctx.beginPath();
                     ctx.moveTo(points[0].x * scale, points[0].y * scale);
-                    ctx.lineTo(points[1].x * scale, points[1].y * scale);
+                    ctx.lineTo(points[3].x * scale, points[3].y * scale);
                     ctx.stroke();
                 }
 
-                // Draw wing line (right to left) - only if both visible
-                if (points[2].visible && points[3].visible) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
+                // Draw wing line (left to right) - only if both visible
+                if (points[1].visible && points[2].visible) {
                     ctx.beginPath();
-                    ctx.moveTo(points[2].x * scale, points[2].y * scale);
-                    ctx.lineTo(points[3].x * scale, points[3].y * scale);
+                    ctx.moveTo(points[1].x * scale, points[1].y * scale);
+                    ctx.lineTo(points[2].x * scale, points[2].y * scale);
+                    ctx.stroke();
+                }
+                
+                // Draw wing root cross if visible
+                if (points[4].visible) {
+                    ctx.strokeStyle = POINT_COLORS[4];
+                    ctx.lineWidth = 1 / zoomLevel;
+                    ctx.setLineDash([]);
+                    const crossSize = 8 / zoomLevel;
+                    const cx = points[4].x * scale;
+                    const cy = points[4].y * scale;
+                    ctx.beginPath();
+                    ctx.moveTo(cx - crossSize, cy);
+                    ctx.lineTo(cx + crossSize, cy);
+                    ctx.moveTo(cx, cy - crossSize);
+                    ctx.lineTo(cx, cy + crossSize);
                     ctx.stroke();
                 }
                 
                 ctx.setLineDash([]);
             }
+            
+            // Restore context state
+            ctx.restore();
         }
 
         function handleCanvasClick(event) {
             const rect = canvas.getBoundingClientRect();
-            const clickX = (event.clientX - rect.left) / scale;
-            const clickY = (event.clientY - rect.top) / scale;
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            
+            // Transform mouse coordinates to image space considering zoom and pan
+            const clickX = ((mouseX - panX) / zoomLevel) / scale;
+            const clickY = ((mouseY - panY) / zoomLevel) / scale;
 
             // Check if clicking near existing point to select it
             let clickedPointIndex = -1;
-            const clickThreshold = 15 / scale; // 15 pixels in image space
+            const clickThreshold = 15 / (scale * zoomLevel); // Adjust threshold for zoom
             
             for (let i = 0; i < points.length; i++) {
                 const dx = points[i].x - clickX;
@@ -828,24 +932,27 @@
             if (clickedPointIndex !== -1) {
                 // Clicked on existing point - toggle visibility with V key or right-click
                 selectedPointIndex = clickedPointIndex;
-                showNotification(`Point ${clickedPointIndex + 1} selected. Press V to toggle visibility or right-click.`);
+                showNotification(`${POINT_LABELS[clickedPointIndex]} seçildi. Görünürlüğü değiştirmek için V tuşuna basın veya sağ tıklayın.`);
                 return;
             }
 
             // Not clicking on existing point - add new point if space available
-            if (!currentImage || points.length >= 4) {
-                if (points.length >= 4) {
-                    showNotification('All points placed! Right-click a point or select & press V to toggle visibility.');
+            if (!currentImage || points.length >= 6) {
+                if (points.length >= 6) {
+                    showNotification('Tüm 6 nokta yerleştirildi! Görünürlüğü değiştirmek için noktaya sağ tıklayın.');
                 }
                 return;
             }
 
-            // Add new point (default visible)
-            points.push({ x: clickX, y: clickY, visible: true });
+            // Add new point (default visible, except last point which defaults to false for Vertical Stabilizer)
+            const defaultVisible = points.length < 5; // First 5 points visible by default, 6th (Vertical Stabilizer) hidden
+            points.push({ x: clickX, y: clickY, visible: defaultVisible });
             drawImage();
 
-            if (points.length === 4) {
-                showNotification('All points placed! Press S to save. Right-click points to toggle visibility.');
+            if (points.length === 6) {
+                showNotification('Tüm 6 nokta yerleştirildi! Kaydetmek için S tuşuna basın. Görünürlüğü değiştirmek için sağ tıklayın.');
+            } else if (points.length === 5) {
+                showNotification('Son nokta: Dikey Dengeleyici (varsayılan: gizli). Varsa görünür yapın ve yerleştirin.');
             }
         }
 
@@ -853,11 +960,15 @@
             event.preventDefault(); // Prevent context menu
             
             const rect = canvas.getBoundingClientRect();
-            const clickX = (event.clientX - rect.left) / scale;
-            const clickY = (event.clientY - rect.top) / scale;
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            
+            // Transform to image space
+            const clickX = ((mouseX - panX) / zoomLevel) / scale;
+            const clickY = ((mouseY - panY) / zoomLevel) / scale;
 
             // Find which point was clicked
-            const clickThreshold = 15 / scale;
+            const clickThreshold = 15 / (scale * zoomLevel);
             
             for (let i = 0; i < points.length; i++) {
                 const dx = points[i].x - clickX;
@@ -867,19 +978,80 @@
                 if (distance < clickThreshold) {
                     // Toggle visibility
                     points[i].visible = !points[i].visible;
-                    const status = points[i].visible ? 'VISIBLE' : 'HIDDEN';
-                    showNotification(`${POINT_LABELS[i]} marked as ${status}`);
+                    const status = points[i].visible ? 'GÖRÜNÜR' : 'GİZLİ';
+                    showNotification(`${POINT_LABELS[i]} ${status} olarak işaretlendi`);
                     drawImage();
                     return;
                 }
             }
         }
 
+        function handleMouseWheel(event) {
+            event.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            
+            // Zoom factor
+            const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+            const newZoom = Math.max(0.5, Math.min(5.0, zoomLevel * zoomFactor));
+            
+            // Adjust pan to zoom towards mouse position
+            const zoomRatio = newZoom / zoomLevel;
+            panX = mouseX - (mouseX - panX) * zoomRatio;
+            panY = mouseY - (mouseY - panY) * zoomRatio;
+            
+            zoomLevel = newZoom;
+            drawImage();
+        }
+
+        function handleMouseDown(event) {
+            if (event.button === 1 || (event.button === 0 && event.shiftKey)) {
+                // Middle mouse button or Shift+Left click for panning
+                event.preventDefault();
+                isPanning = true;
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+
+        function handleMouseMove(event) {
+            if (isPanning) {
+                const dx = event.clientX - lastMouseX;
+                const dy = event.clientY - lastMouseY;
+                
+                panX += dx;
+                panY += dy;
+                
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+                
+                drawImage();
+            }
+        }
+
+        function handleMouseUp(event) {
+            if (isPanning) {
+                isPanning = false;
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+
+        function resetZoom() {
+            zoomLevel = 1.0;
+            panX = 0;
+            panY = 0;
+            drawImage();
+            showNotification('Yakınlaştırma sıfırlandı');
+        }
+
         function resetPoints() {
             points = [];
             selectedPointIndex = -1;
             drawImage();
-            showNotification('Points reset');
+            showNotification('Noktalar sıfırlandı');
         }
 
         function clearCanvas() {
@@ -889,8 +1061,8 @@
         }
 
         async function saveAnnotation() {
-            if (points.length !== 4) {
-                alert('Please place all 4 points before saving!');
+            if (points.length !== 6) {
+                alert('Kaydetmeden önce lütfen tüm 6 noktayı yerleştirin!');
                 return;
             }
 
@@ -910,7 +1082,7 @@
 
                 if (response.ok) {
                     currentImageLocked = false; // Image is unlocked after save
-                    showNotification('✓ Annotation saved!');
+                    showNotification('✓ Etiket kaydedildi!');
                     updateProgress();
                     
                     // Move to next image
@@ -919,7 +1091,7 @@
                     }, 500);
                 }
             } catch (error) {
-                alert('Error saving annotation. Check server connection.');
+                alert('Etiket kaydedilirken hata! Sunucu bağlantısını kontrol edin.');
                 console.error(error);
             }
         }
@@ -928,7 +1100,7 @@
             if (currentImageIndex < images.length - 1) {
                 loadImage(currentImageIndex + 1);
             } else {
-                showNotification('🎉 You reached the last image!');
+                showNotification('🎉 Son görsele ulaştınız!');
             }
         }
 
@@ -941,8 +1113,8 @@
         function toggleVisibility() {
             if (selectedPointIndex >= 0 && selectedPointIndex < points.length) {
                 points[selectedPointIndex].visible = !points[selectedPointIndex].visible;
-                const status = points[selectedPointIndex].visible ? 'VISIBLE' : 'HIDDEN';
-                showNotification(`${POINT_LABELS[selectedPointIndex]} marked as ${status}`);
+                const status = points[selectedPointIndex].visible ? 'GÖRÜNÜR' : 'GİZLİ';
+                showNotification(`${POINT_LABELS[selectedPointIndex]} ${status} olarak işaretlendi`);
                 drawImage();
             }
         }
@@ -956,7 +1128,7 @@
                     prevImage();
                     break;
                 case 's':
-                    if (points.length === 4) {
+                    if (points.length === 6) {
                         saveAnnotation();
                     }
                     break;
@@ -965,6 +1137,9 @@
                     break;
                 case 'v':
                     toggleVisibility();
+                    break;
+                case 'z':
+                    resetZoom();
                     break;
             }
         }

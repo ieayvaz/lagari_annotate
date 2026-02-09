@@ -24,30 +24,38 @@ def export_to_csv(annotations, output_file='annotations.csv'):
     with open(output_file, 'w', newline='') as f:
         writer = csv.writer(f)
         
-        # Header
+        # Header with new 6-point system
         writer.writerow([
             'image_name', 'annotator_name', 'timestamp',
-            'head_x', 'head_y', 'head_visible',
-            'tail_x', 'tail_y', 'tail_visible',
-            'right_wing_x', 'right_wing_y', 'right_wing_visible',
-            'left_wing_x', 'left_wing_y', 'left_wing_visible'
+            'nose_tip_x', 'nose_tip_y', 'nose_tip_visible',
+            'left_wing_tip_x', 'left_wing_tip_y', 'left_wing_tip_visible',
+            'right_wing_tip_x', 'right_wing_tip_y', 'right_wing_tip_visible',
+            'fuselage_tail_x', 'fuselage_tail_y', 'fuselage_tail_visible',
+            'wing_root_x', 'wing_root_y', 'wing_root_visible',
+            'vertical_stabilizer_x', 'vertical_stabilizer_y', 'vertical_stabilizer_visible'
         ])
         
         # Data
         for ann in annotations:
             points = ann['points']
-            # Handle both old format (without visible) and new format (with visible)
             row = [
                 ann['image_name'],
                 ann['annotator_name'],
                 ann['timestamp'],
             ]
-            for p in points:
-                row.extend([
-                    p['x'], 
-                    p['y'], 
-                    p.get('visible', True)  # Default to True for old annotations
-                ])
+            
+            # Add all points (handle variable length for backward compatibility)
+            for i in range(6):
+                if i < len(points):
+                    row.extend([
+                        points[i]['x'], 
+                        points[i]['y'], 
+                        points[i].get('visible', True)
+                    ])
+                else:
+                    # Fill with empty values for missing points
+                    row.extend(['', '', ''])
+            
             writer.writerow(row)
     
     print(f"✓ Exported to CSV: {output_file}")
@@ -70,8 +78,8 @@ def export_to_coco(annotations, images_folder='./images', output_file='coco_anno
                 "id": 1,
                 "name": "uav",
                 "supercategory": "vehicle",
-                "keypoints": ["head", "tail", "right_wing", "left_wing"],
-                "skeleton": [[0, 1], [2, 3]]  # body line, wing line
+                "keypoints": ["nose_tip", "left_wing_tip", "right_wing_tip", "fuselage_tail", "wing_root", "vertical_stabilizer"],
+                "skeleton": [[0, 3], [1, 2]]  # nose to tail, left wing to right wing
             }
         ]
     }
@@ -94,17 +102,23 @@ def export_to_coco(annotations, images_folder='./images', output_file='coco_anno
         # Convert points to COCO keypoint format [x, y, visibility]
         # visibility: 0=not labeled, 1=labeled but not visible, 2=labeled and visible
         keypoints = []
+        num_keypoints = len(ann['points'])
+        
         for point in ann['points']:
             visible = point.get('visible', True)
             visibility_flag = 2 if visible else 1
             keypoints.extend([point['x'], point['y'], visibility_flag])
+        
+        # Pad to 6 keypoints if needed (for backward compatibility)
+        while len(keypoints) < 18:  # 6 keypoints * 3 values each
+            keypoints.extend([0, 0, 0])
         
         annotation_info = {
             "id": idx + 1,
             "image_id": idx + 1,
             "category_id": 1,
             "keypoints": keypoints,
-            "num_keypoints": 4,
+            "num_keypoints": num_keypoints,
             "bbox": [0, 0, 0, 0],  # Calculate bounding box if needed
             "area": 0,
             "iscrowd": 0

@@ -69,19 +69,51 @@ def register_annotator():
 
 @app.route('/api/images', methods=['GET'])
 def get_images():
-    """Get list of all images"""
+    """Get list of all images, optionally filtered by subfolder"""
+    subfolder = request.args.get('subfolder', '')
+    
     images = []
-    for img_file in IMAGE_FOLDER.glob('*'):
+    search_path = IMAGE_FOLDER / subfolder if subfolder else IMAGE_FOLDER
+    
+    if not search_path.exists():
+        return jsonify({'images': [], 'error': 'Subfolder not found'})
+    
+    for img_file in search_path.glob('*'):
         if img_file.suffix.lower() in ['.jpg', '.jpeg', '.png', '.bmp']:
-            images.append(img_file.name)
+            # Store relative path if subfolder is used
+            if subfolder:
+                images.append(f"{subfolder}/{img_file.name}")
+            else:
+                images.append(img_file.name)
     
     images.sort()
     return jsonify({'images': images})
 
-@app.route('/api/image/<filename>')
+@app.route('/api/subfolders', methods=['GET'])
+def get_subfolders():
+    """Get list of all subfolders in images directory"""
+    subfolders = ['']  # Empty string represents root folder
+    
+    for item in IMAGE_FOLDER.iterdir():
+        if item.is_dir() and not item.name.startswith('.'):
+            subfolders.append(item.name)
+    
+    subfolders.sort()
+    return jsonify({'subfolders': subfolders})
+
+@app.route('/api/image/<path:filename>')
 def serve_image(filename):
-    """Serve an image file"""
-    return send_from_directory(IMAGE_FOLDER, filename)
+    """Serve an image file (supports subfolders)"""
+    # Handle subfolders in path
+    file_path = IMAGE_FOLDER / filename
+    if not file_path.exists():
+        return jsonify({'error': 'Image not found'}), 404
+    
+    # Get the directory and filename
+    directory = file_path.parent
+    file_name = file_path.name
+    
+    return send_from_directory(directory, file_name)
 
 @app.route('/api/annotations/<filename>', methods=['GET'])
 def get_annotation(filename):
@@ -93,6 +125,76 @@ def get_annotation(filename):
             return jsonify(json.load(f))
     
     return jsonify({'exists': False})
+
+@app.route('/api/lock/<filename>', methods=['POST'])
+def lock_image(filename):
+    """Lock an image for editing by a specific annotator"""
+    data = request.json
+    annotator_id = data.get('annotator_id')
+    annotator_name = data.get('annotator_name')
+    
+    lock_file = ANNOTATIONS_FOLDER / f".lock_{filename}"
+    
+    # Check if already locked
+    if lock_file.exists():
+        with open(lock_file, 'r') as f:
+            lock_data = json.load(f)
+            
+        # Check if lock is stale (older than 5 minutes)
+        lock_time = datetime.fromisoformat(lock_data['locked_at'])
+        if (datetime.now() - lock_time).total_seconds() < 300:  # 5 minutes
+            # Image is locked by someone else
+            if lock_data['annotator_id'] != annotator_id:
+                return jsonify({
+                    'locked': True,
+                    'locked_by': lock_data['annotator_name'],
+                    'locked_at': lock_data['locked_at']
+                })
+    
+    # Lock the image
+    lock_data = {
+        'annotator_id': annotator_id,
+        'annotator_name': annotator_name,
+        'locked_at': datetime.now().isoformat()
+    }
+    
+    with open(lock_file, 'w') as f:
+        json.dump(lock_data, f)
+    
+    return jsonify({'locked': False, 'success': True})
+
+@app.route('/api/unlock/<filename>', methods=['POST'])
+def unlock_image(filename):
+    """Unlock an image"""
+    lock_file = ANNOTATIONS_FOLDER / f".lock_{filename}"
+    
+    if lock_file.exists():
+        lock_file.unlink()
+    
+    return jsonify({'success': True})
+
+@app.route('/api/locks', methods=['GET'])
+def get_all_locks():
+    """Get all currently locked images"""
+    locks = {}
+    
+    for lock_file in ANNOTATIONS_FOLDER.glob('.lock_*'):
+        try:
+            with open(lock_file, 'r') as f:
+                lock_data = json.load(f)
+            
+            # Check if lock is stale
+            lock_time = datetime.fromisoformat(lock_data['locked_at'])
+            if (datetime.now() - lock_time).total_seconds() < 300:  # 5 minutes
+                image_name = lock_file.name.replace('.lock_', '')
+                locks[image_name] = lock_data
+            else:
+                # Remove stale lock
+                lock_file.unlink()
+        except:
+            pass
+    
+    return jsonify(locks)
 
 @app.route('/api/annotate', methods=['POST'])
 def save_annotation():
@@ -117,6 +219,11 @@ def save_annotation():
     annotation_file = ANNOTATIONS_FOLDER / f"{Path(image_name).stem}.json"
     with open(annotation_file, 'w') as f:
         json.dump(annotation, f, indent=2)
+    
+    # Unlock the image after saving
+    lock_file = ANNOTATIONS_FOLDER / f".lock_{image_name}"
+    if lock_file.exists():
+        lock_file.unlink()
     
     # Update annotator stats
     with open(ANNOTATORS_FILE, 'r') as f:
