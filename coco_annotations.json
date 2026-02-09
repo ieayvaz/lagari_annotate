@@ -1,0 +1,78 @@
+{
+  "info": {
+    "description": "UAV Pose Dataset",
+    "version": "1.0",
+    "year": 2026,
+    "date_created": "2026-02-09T15:14:26.762312"
+  },
+  "licenses": [],
+  "images": [
+    {
+      "id": 1,
+      "file_name": "avci.png",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "annotations": [
+    {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 1,
+      "keypoints": [
+        543.7461340206186,
+        454.6932989690722,
+        2,
+        401.26159793814435,
+        423.2628865979382,
+        1,
+        92.1958762886598,
+        437.930412371134,
+        2,
+        679.944587628866,
+        408.5953608247423,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "num_keypoints": 4,
+      "bbox": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "area": 0,
+      "iscrowd": 0
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "uav",
+      "supercategory": "vehicle",
+      "keypoints": [
+        "nose_tip",
+        "left_wing_tip",
+        "right_wing_tip",
+        "fuselage_tail",
+        "wing_root",
+        "vertical_stabilizer"
+      ],
+      "skeleton": [
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    }
+  ]
+}

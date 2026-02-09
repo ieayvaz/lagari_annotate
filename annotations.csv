@@ -1,0 +1,2 @@
+image_name,annotator_name,timestamp,nose_tip_x,nose_tip_y,nose_tip_visible,left_wing_tip_x,left_wing_tip_y,left_wing_tip_visible,right_wing_tip_x,right_wing_tip_y,right_wing_tip_visible,fuselage_tail_x,fuselage_tail_y,fuselage_tail_visible,wing_root_x,wing_root_y,wing_root_visible,vertical_stabilizer_x,vertical_stabilizer_y,vertical_stabilizer_visible
+avci.png,enes,2026-02-08T16:27:09.953653,543.7461340206186,454.6932989690722,True,401.26159793814435,423.2628865979382,False,92.1958762886598,437.930412371134,True,679.944587628866,408.5953608247423,True,,,,,,

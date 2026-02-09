@@ -1,0 +1,11 @@
+UAV Pose Annotation Statistics
+==================================================
+
+Total Annotations: 1
+Number of Annotators: 1
+
+Annotations per Annotator:
+--------------------------------------------------
+enes                          :    1 (100.0%)
+
+Report generated: 2026-02-09 15:14:26

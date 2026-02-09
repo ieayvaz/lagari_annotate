@@ -805,7 +805,8 @@
             ctx.scale(zoomLevel, zoomLevel);
             
             // Draw the image
-            ctx.drawImage(currentImage, 0, 0, canvas.width / zoomLevel, canvas.height / zoomLevel);
+            // FIX: Removed "/ zoomLevel" from width and height
+            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
 
             // Draw points
             points.forEach((point, index) => {
@@ -815,6 +816,8 @@
                 if (point.visible) {
                     // Draw visible point (solid)
                     ctx.beginPath();
+                    // We keep "/ zoomLevel" here so the dots stay the same 
+                    // visual size regardless of how much you zoom in
                     ctx.arc(x, y, POINT_RADIUS / zoomLevel, 0, 2 * Math.PI);
                     ctx.fillStyle = POINT_COLORS[index];
                     ctx.fill();
